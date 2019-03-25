@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+const metaLoop = require('meta-loop');
+const debug = require('debug')('meta-jest');
+
+if (process.argv[2] === '--help')
+  return console.log('meta jest <jest arguments...>');
+
+const command = `jest ${process.argv.slice(2).join(' ')}`;
+
+debug(`executing ${command}`);
+
+metaLoop(command);
