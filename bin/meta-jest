@@ -1,13 +1,47 @@
 #!/usr/bin/env node
 
-const metaLoop = require('meta-loop');
+// const metaLoop = require('meta-loop');
+// const debug = require('debug')('meta-jest');
+
+// if (process.argv[2] === '--help')
+//   return console.log('meta jest <jest arguments...>');
+
+// const command = `jest ${process.argv.slice(2).join(' ')}`;
+
+// debug(`executing ${command}`);
+
+// metaLoop(command);
+
 const debug = require('debug')('meta-jest');
+const getMetaFile = require('get-meta-file');
+const loop = require('loop');
+const path = require('path');
+const fs = require('fs');
 
-if (process.argv[2] === '--help')
+if (process.argv[2] === '--help') {
   return console.log('meta jest <jest arguments...>');
+}
 
-const command = `jest ${process.argv.slice(2).join(' ')}`;
+const meta = getMetaFile();
+if (!meta) process.exit(1);
+// console.log(getMetaFile.getFileLocation());
 
-debug(`executing ${command}`);
+const projects = meta.projects;
+const folders = Object.keys(projects).map(folder => {
+  return path.resolve(folder);
+});
 
-metaLoop(command);
+filteredFolders = folders.filter(folder => {
+  // see if the folder contains a jest.config.js file
+  const folderExists = fs.existsSync(folder);
+  if (!folderExists) return false;
+  const jestExists = fs.existsSync(path.join(folder, 'jest.config.js'));
+  debug(path.join(folder, 'jest.config.js'));
+  debug(jestExists);
+  return jestExists;
+});
+
+loop({
+  command: `jest ${process.argv.slice(2).join(' ')}`,
+  directories: filteredFolders.sort(),
+});
