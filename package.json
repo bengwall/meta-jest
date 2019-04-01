@@ -1,6 +1,6 @@
 {
   "name": "meta-jest",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "jest plugin for meta",
   "main": "index.js",
   "bin": {
