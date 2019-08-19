@@ -1,17 +1,5 @@
 #!/usr/bin/env node
 
-// const metaLoop = require('meta-loop');
-// const debug = require('debug')('meta-jest');
-
-// if (process.argv[2] === '--help')
-//   return console.log('meta jest <jest arguments...>');
-
-// const command = `jest ${process.argv.slice(2).join(' ')}`;
-
-// debug(`executing ${command}`);
-
-// metaLoop(command);
-
 const debug = require('debug')('meta-jest');
 const getMetaFile = require('get-meta-file');
 const loop = require('loop');
@@ -24,7 +12,6 @@ if (process.argv[2] === '--help') {
 
 const meta = getMetaFile();
 if (!meta) process.exit(1);
-// console.log(getMetaFile.getFileLocation());
 
 const projects = meta.projects;
 const folders = Object.keys(projects).map(folder => {
@@ -35,10 +22,46 @@ filteredFolders = folders.filter(folder => {
   // see if the folder contains a jest.config.js file
   const folderExists = fs.existsSync(folder);
   if (!folderExists) return false;
-  const jestExists = fs.existsSync(path.join(folder, 'jest.config.js'));
-  debug(path.join(folder, 'jest.config.js'));
-  debug(jestExists);
-  return jestExists;
+
+  debug("Looking for jest.config.js");
+  jestConfigPath = path.join(folder, 'jest.config.js');
+  debug(jestConfigPath);
+  const jestConfigFileExists = fs.existsSync(jestConfigPath);
+  if (jestConfigFileExists) {
+    debug("Found jest.config.js");
+    return true;
+  } else {
+    debug("Did not find jest.config.js");
+  }
+
+  debug("Looking for jest config in package.json");
+  const packageJsonPath = path.join(folder, 'package.json');
+  debug(packageJsonPath);
+  const packageJsonFileExists = fs.existsSync(packageJsonPath);
+  if (packageJsonFileExists) {
+    debug("Found package.json");
+  } else {
+    debug("Did not find package.json");
+    return false
+  }
+
+
+  debug("Reading package.json");
+  try {
+    const raw = fs.readFileSync(packageJsonPath, 'utf8');
+    const contents = JSON.parse(raw);
+    if (contents && contents.jest) {
+      debug("Found Jest config package.json");
+      return true
+    } else {
+      debug("Did not find Jest config package.json");
+      return false
+    }
+  } catch (err) {
+    debug("Did not find Jest config package.json");
+    return false
+  }
+
 });
 
 loop({
